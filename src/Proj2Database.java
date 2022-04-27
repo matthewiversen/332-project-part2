@@ -1,10 +1,14 @@
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
+import java.time.LocalDate;
 import java.util.Scanner;
 
 import org.sqlite.SQLiteDataSource;
+
+import java.util.ArrayList;
+import java.util.Date; 
 
 public class Proj2Database {
 
@@ -30,10 +34,25 @@ public class Proj2Database {
 //        		"  currentStock INTEGER NOT NULL,\r\n" + 
 //        		"  supplier INT NOT NULL\r\n" + 
 //        		");";
-
+        
+        String query = "CREATE TABLE IF NOT EXISTS ExpirationDates(\r\n"
+        		+ "  expireDate TEXT NOT NULL,\r\n"
+        		+ "  item INTEGER NOT NULL,\r\n"
+        		+ "  department TEXT NOT NULL,\r\n"
+        		+ "  PRIMARY KEY (expireDate, item),\r\n"
+        		+ "  FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
+        		+ "  FOREIGN KEY (department) REFERENCES Item(department)\r\n"
+        		+ ");";
+        
+        String insertQuery = "INSERT INTO ExpirationDates VALUES('2021-08-24', 57494521, 'Computers');";
+        
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
+        	//stmt.executeUpdate(insertQuery);
         	
+        	LocalDate date = LocalDate.parse("2018-05-05");
+        	boolean after = checkAfter(date);
+        	System.out.println(after);
         	
         	int choice = homeScreen();
             if (choice == 1) {
@@ -41,6 +60,14 @@ public class Proj2Database {
             	Item newItem = createItem();
             	insertNewItem(newItem, stmt);
             	
+            } else if(choice == 2) {
+            	ArrayList<LocalDate> dates = new ArrayList<LocalDate>(1);
+            	ResultSet rs;
+            	rs = getDates(stmt, "Computers");
+            	while (rs.next()) {
+            		//getDates.add(rs.getString("ExpirationDate"));
+            	}
+            	//checkExpirations(LocalDate.parse("2022-04-29"));
             }
         	
         	
@@ -60,6 +87,9 @@ public class Proj2Database {
     		while (true) {
     			try {
     				System.out.println("1. Add item to database");
+    				System.out.println("2. Get items about to expire");
+    				//System.out.println("1. Add item to database");
+    				//System.out.println("1. Add item to database");
     				choice = Integer.parseInt(sc.nextLine());
     				break;
     			}
@@ -154,14 +184,14 @@ public class Proj2Database {
 	    	}
     	}
     	
-    	System.out.println(newItem.getUpc());
-    	System.out.println(newItem.getDept());
-    	System.out.println(newItem.getRestockAmount());
-    	System.out.println(newItem.getPrice());
-    	System.out.println(newItem.getSalePrice());
-    	System.out.println(newItem.getWholesalePrice());
-    	System.out.println(newItem.getCurrentStock());
-    	System.out.println(newItem.getSupplierID());
+//    	System.out.println(newItem.getUpc());
+//    	System.out.println(newItem.getDept());
+//    	System.out.println(newItem.getRestockAmount());
+//    	System.out.println(newItem.getPrice());
+//    	System.out.println(newItem.getSalePrice());
+//    	System.out.println(newItem.getWholesalePrice());
+//    	System.out.println(newItem.getCurrentStock());
+//    	System.out.println(newItem.getSupplierID());
     	return newItem;
     }
 
@@ -183,4 +213,18 @@ public class Proj2Database {
     	return 0;
     }
     
+    public static boolean checkAfter(LocalDate date) {
+    	LocalDate testDate = LocalDate.parse("2019-05-05");
+    	return testDate.isAfter(date);
+    }
+    
+    public static ResultSet getDates(Statement stmt, String department) {
+    	String query = "SELECT item FROM ExpirationDates WHERE Department = " + department + ";";
+    	try {
+			return stmt.executeQuery(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	return null;
+    }
 }
