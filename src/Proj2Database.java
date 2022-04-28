@@ -42,13 +42,16 @@ public class Proj2Database {
 //        		+ "  FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
 //        		+ "  FOREIGN KEY (department) REFERENCES Item(department)\r\n"
 //        		+ ");";
-//        
-//        String insertQuery = "INSERT INTO ExpirationDates VALUES('2022-04-30', 8375, 'Computers');";
+        
+//        String insertQuery = "INSERT INTO ExpirationDates VALUES('2022-04-30', 5869, 1);";
+//        String insertQuery2 = "INSERT INTO ExpirationDates VALUES('2022-04-26', 3972, 1);";
+//        String insertQuery3 = "INSERT INTO ExpirationDates VALUES('2022-04-28', 4912, 3);";
 //        String selectQuery = "SELECT * FROM Item WHERE department = 2;";
+        
         
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
-        		//int rv = stmt.executeUpdate(query);
+//        		stmt.executeUpdate(query);
         	
         	int choice = homeScreen();
             if (choice == 1) {
@@ -58,8 +61,16 @@ public class Proj2Database {
             	
             } else if(choice == 2) {
             	Scanner sc = new Scanner(System.in);
-            	System.out.println("Input a department: ");
-            	String input = sc.nextLine();
+            	int input;
+            	while (true) { //This while loop controls invalid input by attempting to cast input as an Integer
+            		try {
+            			System.out.println("Input a department: ");
+                    	input = Integer.parseInt(sc.nextLine()); // Reads input from console
+                    	break;
+            		} catch(NumberFormatException e) {
+	    	    		System.out.println("That was not a valid number, please try again.");
+	            	}
+            	}
             	ResultSet rs = getDates(stmt, input); //Gets all expiration dates from the expireDate table
             	
             	ArrayList<Integer> expiringItems = fillItemsArray(rs); //Creates an arraylist of items w/ dates within 2 days of current date
@@ -105,7 +116,7 @@ public class Proj2Database {
     public static int homeScreen() {
     	Scanner sc = new Scanner(System.in);
     	int choice = 0;
-    	while(choice <= 0 || choice > 4) {
+    	while(choice <= 0 || choice > 4) { //Input must be between 1 and 4
     		while (true) {
     			try {
     				System.out.println("1. Add item to database");
@@ -248,8 +259,8 @@ public class Proj2Database {
     	return targetDate.isAfter(date);
     }
     
-    public static ResultSet getDates(Statement stmt, String department) {
-    	String query = "SELECT item, expireDate FROM ExpirationDates WHERE Department = '" + department + "';";
+    public static ResultSet getDates(Statement stmt, int department) {
+    	String query = "SELECT item, expireDate FROM ExpirationDates WHERE Department = " + department + ";";
     	try {
 			return stmt.executeQuery(query);
 		} catch (SQLException e) {
