@@ -35,16 +35,16 @@ public class Proj2Database {
 //        		"  supplier INT NOT NULL\r\n" + 
 //        		");";
         
-        String query = "CREATE TABLE IF NOT EXISTS ExpirationDates(\r\n"
-        		+ "  expireDate TEXT NOT NULL,\r\n"
-        		+ "  item INTEGER NOT NULL,\r\n"
-        		+ "  department TEXT NOT NULL,\r\n"
-        		+ "  PRIMARY KEY (expireDate, item),\r\n"
-        		+ "  FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
-        		+ "  FOREIGN KEY (department) REFERENCES Item(department)\r\n"
-        		+ ");";
-        
-        String insertQuery = "INSERT INTO ExpirationDates VALUES('2021-08-24', 57494521, 'Computers');";
+//        String query = "CREATE TABLE IF NOT EXISTS ExpirationDates(\r\n"
+//        		+ "  expireDate TEXT NOT NULL,\r\n"
+//        		+ "  item INTEGER NOT NULL,\r\n"
+//        		+ "  department TEXT NOT NULL,\r\n"
+//        		+ "  PRIMARY KEY (expireDate, item),\r\n"
+//        		+ "  FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
+//        		+ "  FOREIGN KEY (department) REFERENCES Item(department)\r\n"
+//        		+ ");";
+//        
+//        String insertQuery = "INSERT INTO ExpirationDates VALUES('2022-04-30', 8375, 'Computers');";
         
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
@@ -61,13 +61,15 @@ public class Proj2Database {
             	insertNewItem(newItem, stmt);
             	
             } else if(choice == 2) {
-            	ArrayList<LocalDate> dates = new ArrayList<LocalDate>(1);
-            	ResultSet rs;
-            	rs = getDates(stmt, "Computers");
-            	while (rs.next()) {
-            		//getDates.add(rs.getString("ExpirationDate"));
+            	ResultSet rs = getDates(stmt, "Computers"); //Gets all expiration dates from the expireDate table
+            	
+            	ArrayList<Integer> expiringItems = fillItemsArray(rs); //Creates an arraylist of items w/ dates within 2 days of current date
+            	
+            	System.out.println("Items about to expire:");
+            	
+            	for(int i = 0; i < expiringItems.size(); i++) {
+            		System.out.println(expiringItems.get(i));
             	}
-            	//checkExpirations(LocalDate.parse("2022-04-29"));
             }
         	
         	
@@ -214,17 +216,28 @@ public class Proj2Database {
     }
     
     public static boolean checkAfter(LocalDate date) {
-    	LocalDate testDate = LocalDate.parse("2019-05-05");
-    	return testDate.isAfter(date);
+    	LocalDate targetDate = LocalDate.now().plusDays(2); //Add 2 days to the current day
+    	return targetDate.isAfter(date);
     }
     
     public static ResultSet getDates(Statement stmt, String department) {
-    	String query = "SELECT item FROM ExpirationDates WHERE Department = " + department + ";";
+    	String query = "SELECT item, expireDate FROM ExpirationDates WHERE Department = '" + department + "';";
     	try {
 			return stmt.executeQuery(query);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
     	return null;
+    }
+
+    public static ArrayList<Integer> fillItemsArray(ResultSet rs) throws SQLException {
+    	ArrayList<Integer> expiringItems = new ArrayList<Integer>(1); //Create an arrayList of size 1 to be able to add to later
+    	while (rs.next()) {
+    		if (checkAfter(LocalDate.parse(rs.getString( "expireDate" )))) { // returns true if expire date is sooner than 2 days from the current date
+    			if(!expiringItems.contains(rs.getInt("item"))) // Only adds to arraylist if the item isn't already inside
+    				expiringItems.add(rs.getInt("item"));
+    		}
+    	}
+    	return expiringItems;
     }
 }
