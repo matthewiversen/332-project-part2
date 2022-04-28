@@ -122,15 +122,17 @@ public class Proj2Database {
 	            	}
             	}
             
-            	ResultSet rs = getItemsToOrder(stmt, input);
+            	ResultSet rsItems = getItemsToOrder(stmt, input);
             	ArrayList<Integer> itemsToOrder = new ArrayList<Integer>(1);
+            	ArrayList<Integer> previousOrderIDs = new ArrayList<Integer>(1);
             	if (rs.isClosed()) { //If the SQL query returns a closed set, the database inputed doesn't exist.
             		System.out.println("Department doesn't exist or invalid input.");
             	} else {
-	            	while (rs.next()) {
-	            		itemsToOrder.add(rs.getInt("upc"));
+	            	while (rsItems.next()) {
+	            		itemsToOrder.add(rsItems.getInt("upc"));
 	            	}
 	            	for(int i = 0; i < itemsToOrder.size(); i++) {
+	            		parseIDs(itemsToOrder.get(i), );
 	            		System.out.println(itemsToOrder.get(i));
 	            	}
             	}
@@ -319,5 +321,23 @@ public class Proj2Database {
     	System.out.println("Null returning");
     	return null;
     	
+    }
+
+    public static ResultSet getPreviousOrderIDs(Statement stmt, int item) {
+    	String query = "SELECT id FROM Orders WHERE itemOrdered = " + item + ";"; 
+    	try {
+			ResultSet returnRS = stmt.executeQuery(query);
+			return returnRS;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	System.out.println("Null returning");
+    	return null;
+    }
+    
+    public static void parseIDs(ResultSet rs, ArrayList<Integer>previousOrderIDs) throws SQLException {
+    	while(rs.next()){
+    		previousOrderIDs.add(rs.getInt("id"));
+    	}
     }
 }
