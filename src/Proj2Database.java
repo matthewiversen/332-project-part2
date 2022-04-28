@@ -49,10 +49,6 @@ public class Proj2Database {
               Statement stmt = conn.createStatement(); ) {
         	//stmt.executeUpdate(insertQuery);
         	
-        	LocalDate date = LocalDate.parse("2018-05-05");
-        	boolean after = checkAfter(date);
-        	System.out.println(after);
-        	
         	int choice = homeScreen();
             if (choice == 1) {
             	
@@ -73,14 +69,36 @@ public class Proj2Database {
             		System.out.println(expiringItems.get(i));
             	}
             } else if(choice == 3) {
-            	
+            	int input;
+            	while (true) {
+	            	try {
+	            		Scanner sc = new Scanner(System.in);
+	            		System.out.println("Input department number: ");
+	            		input = Integer.parseInt(sc.nextLine());
+	            		break;
+	            		
+	            	} catch(NumberFormatException e) {
+	    	    		System.out.println("That was not a valid number, please try again.");
+	            	}
+            	}
+            
+            	ResultSet rs = getItemsToOrder(stmt, input);
+            	ArrayList<Integer> itemsToOrder = new ArrayList<Integer>(1);
+            	if (rs.isClosed()) { //If the SQL query returns a closed set, the database inputed doesn't exist.
+            		System.out.println("Department doesn't exist or invalid input.");
+            	} else {
+	            	while (rs.next()) {
+	            		itemsToOrder.add(rs.getInt("upc"));
+	            	}
+	            	for(int i = 0; i < itemsToOrder.size(); i++) {
+	            		System.out.println(itemsToOrder.get(i));
+	            	}
+            	}
             }
         } catch ( SQLException e ) {
             e.printStackTrace();
             System.exit( 0 );
         }
-        
-
     }
     
     public static int homeScreen() {
@@ -240,5 +258,18 @@ public class Proj2Database {
     		}
     	}
     	return expiringItems;
+    }
+
+    public static ResultSet getItemsToOrder(Statement stmt, int department) {
+    	String query = "SELECT upc FROM Item WHERE department = " + department + " AND restrockAmount > currentStock;";// WHERE department = 'Computers'";// WHERE department = 'Computers';";//WHERE Department = 'Computers';";///* + department + */ + " AND restrockAmount > currentStock;";
+    	try {
+			ResultSet returnRS = stmt.executeQuery(query);
+			return returnRS;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	System.out.println("Null returning");
+    	return null;
+    	
     }
 }
