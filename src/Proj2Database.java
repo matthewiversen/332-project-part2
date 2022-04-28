@@ -8,7 +8,6 @@ import java.util.Scanner;
 import org.sqlite.SQLiteDataSource;
 
 import java.util.ArrayList;
-import java.util.Date; 
 
 public class Proj2Database {
 
@@ -61,7 +60,10 @@ public class Proj2Database {
             	insertNewItem(newItem, stmt);
             	
             } else if(choice == 2) {
-            	ResultSet rs = getDates(stmt, "Computers"); //Gets all expiration dates from the expireDate table
+            	Scanner sc = new Scanner(System.in);
+            	System.out.println("Input a department: ");
+            	String input = sc.nextLine();
+            	ResultSet rs = getDates(stmt, input); //Gets all expiration dates from the expireDate table
             	
             	ArrayList<Integer> expiringItems = fillItemsArray(rs); //Creates an arraylist of items w/ dates within 2 days of current date
             	
@@ -70,10 +72,9 @@ public class Proj2Database {
             	for(int i = 0; i < expiringItems.size(); i++) {
             		System.out.println(expiringItems.get(i));
             	}
+            } else if(choice == 3) {
+            	
             }
-        	
-        	
-        	
         } catch ( SQLException e ) {
             e.printStackTrace();
             System.exit( 0 );
@@ -90,7 +91,7 @@ public class Proj2Database {
     			try {
     				System.out.println("1. Add item to database");
     				System.out.println("2. Get items about to expire");
-    				//System.out.println("1. Add item to database");
+    				System.out.println("3. Get needed restock");
     				//System.out.println("1. Add item to database");
     				choice = Integer.parseInt(sc.nextLine());
     				break;
