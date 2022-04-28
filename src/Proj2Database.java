@@ -21,6 +21,8 @@ public class Proj2Database {
             e.printStackTrace();
             System.exit(0);
         }
+        
+        //Leaving some commented out query strings as examples
 //        System.out.println( "Opened database successfully" );
 //
 //        String query = "CREATE TABLE IF NOT EXISTS Item(\r\n" + 
@@ -42,16 +44,40 @@ public class Proj2Database {
 //        		+ "  FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
 //        		+ "  FOREIGN KEY (department) REFERENCES Item(department)\r\n"
 //        		+ ");";
+//        String query = "CREATE TABLE IF NOT EXISTS Orders(\r\n"
+//        		+ "  id INTEGER NOT NULL,\r\n"
+//        		+ "  itemOrdered INTEGER NOT NULL,\r\n"
+//        		+ "  PRIMARY KEY (id),\r\n"
+//        		+ "  FOREIGN KEY (itemOrdered) REFERENCES Item(upc)\r\n"
+//        		+ ");";
+//        String query = "CREATE TABLE IF NOT EXISTS Delivery(\r\n"
+//        		+ "  id INTEGER NOT NULL,\r\n"
+//        		+ "  arrivalDate TEXT NOT NULL,\r\n"
+//        		+ "  numOfPallets INTEGER NOT NULL,\r\n"
+//        		+ "  truckID INTEGER NOT NULL,\r\n"
+//        		+ "  PRIMARY KEY (id)\r\n"
+//        		+ ");";
         
-//        String insertQuery = "INSERT INTO ExpirationDates VALUES('2022-04-30', 5869, 1);";
+        //String insertQuery = "INSERT INTO Orders VALUES(10, 4798);";
+        //String insertQuery = "INSERT INTO Delivery VALUES(2341, '2022-01-17', 2, 14);";
+        //stmt.dropQuery = "DROP TABLE IF EXISTS Orders;";
 //        String insertQuery2 = "INSERT INTO ExpirationDates VALUES('2022-04-26', 3972, 1);";
 //        String insertQuery3 = "INSERT INTO ExpirationDates VALUES('2022-04-28', 4912, 3);";
-//        String selectQuery = "SELECT * FROM Item WHERE department = 2;";
+        String selectQuery = "SELECT * FROM Delivery;";
         
         
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
 //        		stmt.executeUpdate(query);
+//        		stmt.executeUpdate(insertQuery);
+        	ResultSet res = stmt.executeQuery(selectQuery);
+        	while(res.next()) {
+        		System.out.println(res.getInt("id"));
+        		System.out.println(res.getString("arrivalDate"));
+        		System.out.println(res.getInt("numOfPallets"));
+        		System.out.println(res.getInt("truckID"));
+        	}
+        	
         	
         	int choice = homeScreen();
             if (choice == 1) {
