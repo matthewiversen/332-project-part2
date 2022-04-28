@@ -21,11 +21,11 @@ public class Proj2Database {
             e.printStackTrace();
             System.exit(0);
         }
-        System.out.println( "Opened database successfully" );
-
+//        System.out.println( "Opened database successfully" );
+//
 //        String query = "CREATE TABLE IF NOT EXISTS Item(\r\n" + 
 //        		"  upc INTEGER PRIMARY KEY,\r\n" + 
-//        		"  department TEXT NOT NULL,\r\n" + 
+//        		"  department INTEGER NOT NULL,\r\n" + 
 //        		"  restockAmount INTEGER,\r\n" + 
 //        		"  price NUMERICAL NOT NULL,\r\n" + 
 //        		"  interimPrice NUMERICAL NOT NULL,\r\n" + 
@@ -44,10 +44,11 @@ public class Proj2Database {
 //        		+ ");";
 //        
 //        String insertQuery = "INSERT INTO ExpirationDates VALUES('2022-04-30', 8375, 'Computers');";
+//        String selectQuery = "SELECT * FROM Item WHERE department = 2;";
         
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
-        	//stmt.executeUpdate(insertQuery);
+        		//int rv = stmt.executeUpdate(query);
         	
         	int choice = homeScreen();
             if (choice == 1) {
@@ -136,8 +137,16 @@ public class Proj2Database {
 	    	}
     	}
     	
-    	System.out.println("Input department:");
-    	newItem.setDept(sc.nextLine());
+    	while (true) {
+	    	System.out.println("Input department number: ");
+	    	try {
+	    		newItem.setDept(Integer.parseInt(sc.nextLine()));
+	    		break;
+	    	}
+	    	catch(NumberFormatException e) {
+	    		System.out.println("That was not a valid number");
+	    	}
+    	}
     	
     	while (true) {
 	    	System.out.println("Input restock amount: ");
@@ -261,7 +270,7 @@ public class Proj2Database {
     }
 
     public static ResultSet getItemsToOrder(Statement stmt, int department) {
-    	String query = "SELECT upc FROM Item WHERE department = " + department + " AND restrockAmount > currentStock;";// WHERE department = 'Computers'";// WHERE department = 'Computers';";//WHERE Department = 'Computers';";///* + department + */ + " AND restrockAmount > currentStock;";
+    	String query = "SELECT upc FROM Item WHERE department = " + department + " AND restockAmount > currentStock;"; // To execute a SQL command, save in a string and then pass the queryString as an arg in an execute function
     	try {
 			ResultSet returnRS = stmt.executeQuery(query);
 			return returnRS;

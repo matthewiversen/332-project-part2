@@ -8,11 +8,11 @@ public class Item {
 		this.upc = upc;
 	}
 
-	public String getDept() {
+	public int getDept() {
 		return dept;
 	}
 
-	public void setDept(String dept) {
+	public void setDept(int dept) {
 		this.dept = dept;
 	}
 
@@ -65,7 +65,7 @@ public class Item {
 	}
 
 	private int upc;
-	private String dept;
+	private int dept;
 	private int restockAmount;
 	private float price;
 	private float salePrice;
