@@ -145,8 +145,14 @@ public class Proj2Database {
 		            	}
 	            	} else {
 	            		System.out.println("No previous orders for these item numbers");
-	            	}
+	            	}            	
             	}
+            } else if(choice == 4) {
+            	Scanner sc = new Scanner(System.in);
+            	System.out.println("Enter item ID: ");
+            	int input = sc.nextInt();
+            	System.out.println(itemExists(stmt, input));
+            	
             }
         } catch ( SQLException e ) {
             e.printStackTrace();
@@ -163,7 +169,7 @@ public class Proj2Database {
     				System.out.println("1. Add item to database");
     				System.out.println("2. Get items about to expire");
     				System.out.println("3. Get needed restock");
-    				//System.out.println("1. Add item to database");
+    				System.out.println("4. Customer transaction");
     				choice = Integer.parseInt(sc.nextLine());
     				break;
     			}
@@ -351,5 +357,15 @@ public class Proj2Database {
     		previousOrderIDs.add(rs.getInt("id"));
     	}
     	return previousOrderIDs;
+    }
+    public static boolean itemExists(Statement stmt, int item) throws SQLException {
+    	String query = "SELECT upc FROM Item WHERE upc = " + item + ";";
+    	ResultSet rs = null;
+    	try {
+			rs = stmt.executeQuery(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	return !rs.isClosed();
     }
 }
