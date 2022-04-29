@@ -55,31 +55,31 @@ public class Proj2Database {
 //        		+ "  FOREIGN KEY (itemOrdered) REFERENCES Item(upc),\r\n"
 //        		+ "  FOREIGN KEY (delivery) REFERENCES Delivery(id)\r\n"
 //        		+ ");";
-//        String query = "CREATE TABLE IF NOT EXISTS Delivery(\r\n"
-//        		+ "  id INTEGER NOT NULL,\r\n"
-//        		+ "  arrivalDate TEXT NOT NULL,\r\n"
-//        		+ "  numOfPallets INTEGER NOT NULL,\r\n"
-//        		+ "  truckID INTEGER NOT NULL,\r\n"
-//        		+ "  PRIMARY KEY (id)\r\n"
-//        		+ ");";
+        String query = "CREATE TABLE IF NOT EXISTS Transactions(\r\n"
+        		+ "  id INTEGER NOT NULL,\r\n"
+        		+ "  timeOfPurchase TEXT NOT NULL,\r\n"
+        		+ "  customerID INTEGER NOT NULL,\r\n"
+        		+ "  PRIMARY KEY (id),\r\n"
+        		+ "  FOREIGN KEY (customerID) REFERENCES Customers(custID)\r\n"
+        		+ ");";
         
         //String insertQuery = "INSERT INTO Orders VALUES(42, 4798, 32, '2022-01-14', TRUE, 2341);";
-        String insertQuery = "INSERT INTO Orders VALUES(42, 3972, 12, '2022-02-24', FALSE, NULL);";
+        String insertQuery = "INSERT INTO Transactions VALUES(89, '2022-04-07 22:18', 48);";
         //String insertQuery = "INSERT INTO Delivery VALUES(2341, '2022-01-17', 2, 14);";
         //stmt.dropQuery = "DROP TABLE IF EXISTS Orders;";
 //        String insertQuery2 = "INSERT INTO ExpirationDates VALUES('2022-04-26', 3972, 1);";
 //        String insertQuery3 = "INSERT INTO ExpirationDates VALUES('2022-04-28', 4912, 3);";
-        String selectQuery = "SELECT * FROM Orders;";
+        String selectQuery = "SELECT * FROM Transactions;";
         
         
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
-//        		stmt.executeUpdate(query);
-//        		stmt.executeUpdate(insertQuery);
-//        	ResultSet res = stmt.executeQuery(selectQuery);
-//        	while(res.next()) {
-//        		System.out.println(res.getInt("id"));
-//        	}
+        	stmt.executeUpdate(query);
+        	stmt.executeUpdate(insertQuery);
+        	ResultSet res = stmt.executeQuery(selectQuery);
+        	while(res.next()) {
+        		System.out.println(res.getInt("id"));
+        	}
         	
         	
         	int choice = homeScreen();
@@ -148,10 +148,19 @@ public class Proj2Database {
 	            	}            	
             	}
             } else if(choice == 4) {
-            	Scanner sc = new Scanner(System.in);
             	System.out.println("Enter item ID: ");
-            	int input = sc.nextInt();
-            	System.out.println(itemExists(stmt, input));
+            	int input = readInput();
+            	if(itemExists(stmt, input)) {
+            		System.out.println("Input customer ID");
+            		input = readInput();
+            		if(customerExists(stmt, input)) {
+            			System.out.println("Input a transaction ID: ");    
+            			input = readInput();
+            			System.out.println(transactionExists(stmt, input));
+            		}
+            	} else {
+            		System.out.println("Item not found.");
+            	}
             	
             }
         } catch ( SQLException e ) {
@@ -360,6 +369,40 @@ public class Proj2Database {
     }
     public static boolean itemExists(Statement stmt, int item) throws SQLException {
     	String query = "SELECT upc FROM Item WHERE upc = " + item + ";";
+    	ResultSet rs = null;
+    	try {
+			rs = stmt.executeQuery(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	return !rs.isClosed();
+    }
+    
+    public static int readInput() {
+    	Scanner sc = new Scanner(System.in);
+    	int input;
+    	while (true) { //This while loop controls invalid input by attempting to cast input as an Integer
+    		try {
+            	input = Integer.parseInt(sc.nextLine()); // Reads input from console
+            	return input;
+    		} catch(NumberFormatException e) {
+	    		System.out.println("That was not a valid number, please try again.");
+        	}
+    	}
+    	//return input;
+    }
+    public static boolean customerExists(Statement stmt, int customerID) throws SQLException {
+    	String query = "SELECT id FROM Customer WHERE id = " + customerID + ";";
+    	ResultSet rs = null;
+    	try {
+			rs = stmt.executeQuery(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+    	return !rs.isClosed();
+    }
+    public static boolean transactionExists(Statement stmt, int transactionID) throws SQLException {
+    	String query = "SELECT id FROM Transaction WHERE id = " + transactionID + ";";
     	ResultSet rs = null;
     	try {
 			rs = stmt.executeQuery(query);
