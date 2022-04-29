@@ -44,17 +44,17 @@ public class Proj2Database {
 //        		+ "  FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
 //        		+ "  FOREIGN KEY (department) REFERENCES Item(department)\r\n"
 //        		+ ");";
-        String query = "CREATE TABLE IF NOT EXISTS Orders("
-        		+ "  id INTEGER NOT NULL,\r\n"
-        		+ "  itemOrdered INTEGER NOT NULL,\r\n"
-        		+ "  qty INTEGER NOT NULL,\r\n"
-        		+ "  orderDate TEXT NOT NULL,\r\n"
-        		+ "  onDelivery NUMERIC NOT NULL,\r\n"
-        		+ "  delivery INTEGER,\r\n"
-        		+ "  PRIMARY KEY (id),\r\n"
-        		+ "  FOREIGN KEY (itemOrdered) REFERENCES Item(upc),\r\n"
-        		+ "  FOREIGN KEY (delivery) REFERENCES Delivery(id)\r\n"
-        		+ ");";
+//        String query = "CREATE TABLE IF NOT EXISTS Orders("
+//        		+ "  id INTEGER NOT NULL,\r\n"
+//        		+ "  itemOrdered INTEGER NOT NULL,\r\n"
+//        		+ "  qty INTEGER NOT NULL,\r\n"
+//        		+ "  orderDate TEXT NOT NULL,\r\n"
+//        		+ "  onDelivery NUMERIC NOT NULL,\r\n"
+//        		+ "  delivery INTEGER,\r\n"
+//        		+ "  PRIMARY KEY (id),\r\n"
+//        		+ "  FOREIGN KEY (itemOrdered) REFERENCES Item(upc),\r\n"
+//        		+ "  FOREIGN KEY (delivery) REFERENCES Delivery(id)\r\n"
+//        		+ ");";
 //        String query = "CREATE TABLE IF NOT EXISTS Delivery(\r\n"
 //        		+ "  id INTEGER NOT NULL,\r\n"
 //        		+ "  arrivalDate TEXT NOT NULL,\r\n"
@@ -63,7 +63,8 @@ public class Proj2Database {
 //        		+ "  PRIMARY KEY (id)\r\n"
 //        		+ ");";
         
-        String insertQuery = "INSERT INTO Orders VALUES(10, 4798, 32, '2022-01-14', TRUE, 2341);";
+        //String insertQuery = "INSERT INTO Orders VALUES(42, 4798, 32, '2022-01-14', TRUE, 2341);";
+        String insertQuery = "INSERT INTO Orders VALUES(42, 3972, 12, '2022-02-24', FALSE, NULL);";
         //String insertQuery = "INSERT INTO Delivery VALUES(2341, '2022-01-17', 2, 14);";
         //stmt.dropQuery = "DROP TABLE IF EXISTS Orders;";
 //        String insertQuery2 = "INSERT INTO ExpirationDates VALUES('2022-04-26', 3972, 1);";
@@ -73,12 +74,12 @@ public class Proj2Database {
         
         try ( Connection conn = ds.getConnection();
               Statement stmt = conn.createStatement(); ) {
-        		stmt.executeUpdate(query);
-        		//stmt.executeUpdate(insertQuery);
-        	ResultSet res = stmt.executeQuery(selectQuery);
-        	while(res.next()) {
-        		System.out.println(res.getInt("id"));
-        	}
+//        		stmt.executeUpdate(query);
+//        		stmt.executeUpdate(insertQuery);
+//        	ResultSet res = stmt.executeQuery(selectQuery);
+//        	while(res.next()) {
+//        		System.out.println(res.getInt("id"));
+//        	}
         	
         	
         	int choice = homeScreen();
@@ -122,18 +123,28 @@ public class Proj2Database {
 	            	}
             	}
             
-            	ResultSet rsItems = getItemsToOrder(stmt, input);
-            	ArrayList<Integer> itemsToOrder = new ArrayList<Integer>(1);
-            	ArrayList<Integer> previousOrderIDs = new ArrayList<Integer>(1);
-            	if (rs.isClosed()) { //If the SQL query returns a closed set, the database inputed doesn't exist.
-            		System.out.println("Department doesn't exist or invalid input.");
+            	ResultSet rsItems = getItemsToOrder(stmt, input); // Queries the database for all items that have less currentStock than the RestockAmount
+            	ArrayList<Integer> itemsToOrder = new ArrayList<Integer>(1); //Arraylist of item IDs that need to be restocked
+            	ArrayList<Integer> previousOrderIDs = new ArrayList<Integer>(1); //Arraylist of order IDs that have been previously made for items that are currently low on stock
+            	if (rsItems.isClosed()) { //If the SQL query returns a closed set, the database inputed doesn't exist.
+            		System.out.println("Department doesn't exist or invalid input."); 
             	} else {
 	            	while (rsItems.next()) {
 	            		itemsToOrder.add(rsItems.getInt("upc"));
+	            		ResultSet item = getPreviousOrderIDs(stmt, rsItems.getInt("upc")); //Gets the order ID from the item that's returned by previous SQL query 
+	            		previousOrderIDs = parseIDs(item, previousOrderIDs); //Adds all of the order IDs from the previous SQL query to the previousOrderIDs arrayList
 	            	}
+	            	System.out.println("Items needing restock: ");
 	            	for(int i = 0; i < itemsToOrder.size(); i++) {
-	            		parseIDs(itemsToOrder.get(i), );
-	            		System.out.println(itemsToOrder.get(i));
+	            		System.out.println(itemsToOrder.get(i)); //Print all items that need restocking
+	            	}
+	            	if(previousOrderIDs.size() > 0) {
+	            		System.out.println("Previous Order IDs for these items: ");
+		            	for(int i = 0; i < previousOrderIDs.size(); i++) {
+		            		System.out.println(previousOrderIDs.get(i)); // Print all order IDs returned by previous SQL queries.
+		            	}
+	            	} else {
+	            		System.out.println("No previous orders for these item numbers");
 	            	}
             	}
             }
@@ -335,9 +346,10 @@ public class Proj2Database {
     	return null;
     }
     
-    public static void parseIDs(ResultSet rs, ArrayList<Integer>previousOrderIDs) throws SQLException {
+    public static ArrayList<Integer> parseIDs(ResultSet rs, ArrayList<Integer>previousOrderIDs) throws SQLException {
     	while(rs.next()){
     		previousOrderIDs.add(rs.getInt("id"));
     	}
+    	return previousOrderIDs;
     }
 }
