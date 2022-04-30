@@ -76,9 +76,7 @@ public class Proj2Database {
 		// String insertQuery3 = "INSERT INTO ExpirationDates VALUES('2022-04-28', 4912,
 		// 3);";
 		String selectQuery = "SELECT * FROM itemsBought;";
-		
-		
-		
+
 		try (Connection conn = ds.getConnection();
 				Statement stmt = conn.createStatement();) {
 			// stmt.executeUpdate(query);
@@ -166,7 +164,7 @@ public class Proj2Database {
 					}
 				}
 			} else if (choice == 4) {
-				
+
 				ItemBought newItemBought = new ItemBought();
 				System.out.println("Enter item ID: ");
 
@@ -185,15 +183,18 @@ public class Proj2Database {
 							newItemBought.setQty(readInput());
 							newItemBought.setPrice(queryPrice(stmt, newItemBought.getItemID()));
 							newItemBought.calculatePrice();
-							addToItemsBought(stmt, newItemBought.getItemID(), newItemBought.getTransactionID(), newItemBought.getQty(), newItemBought.getTransactionPrice());
+							addToItemsBought(stmt, newItemBought.getItemID(), newItemBought.getTransactionID(),
+									newItemBought.getQty(), newItemBought.getTransactionPrice());
 						} else {
-							Transaction newTransaction = createTransaction(newItemBought.getCustomerID(), newItemBought.getTransactionID());
+							Transaction newTransaction = createTransaction(newItemBought.getCustomerID(),
+									newItemBought.getTransactionID());
 							insertTransaction(stmt, newTransaction);
 							System.out.println("How many to purchase?: ");
 							newItemBought.setQty(readInput());
 							newItemBought.setPrice(queryPrice(stmt, newItemBought.getItemID()));
 							newItemBought.calculatePrice();
-							addToItemsBought(stmt, newItemBought.getItemID(), newItemBought.getTransactionID(), newItemBought.getQty(), newItemBought.getTransactionPrice());
+							addToItemsBought(stmt, newItemBought.getItemID(), newItemBought.getTransactionID(),
+									newItemBought.getQty(), newItemBought.getTransactionPrice());
 						}
 					}
 				} else {
@@ -202,7 +203,23 @@ public class Proj2Database {
 
 			} else if (choice == 7) {
 				System.out.println("Hello there :)");
+			} else if (choice == 9) {
+				// Total Transaction Option
+				clearScreen();
+
+				System.out.print("\n\t===== TRANSACTION TOTAL INQUIRY =====\n\nPlease enter transaction ID: ");
+				int tId = readInput();
+				System.out.print("Please enter customer ID: ");
+				int custId = readInput();
+				double total = totalTransaction(stmt, tId, custId);
+
+				if (total == 0.0) {
+					System.out.println("\nERROR: Transaction not found!\n");
+				} else {
+					System.out.println("\nTotal for Transaction (#" + tId + "): $ " + total + "\n");
+				}
 			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(0);
@@ -212,14 +229,17 @@ public class Proj2Database {
 	public static int homeScreen() {
 		Scanner sc = new Scanner(System.in);
 		int choice = 0;
-		while (choice <= 0 || choice > 7) { // Input must be between 1 and 4
+		while (choice <= 0 || choice > 9) { // Input must be between 1 and 4
 			while (true) {
 				try {
+					clearScreen();
+					System.out.println("\n\t===== PROJECT 2 DATABASE PROGRAM =====\n");
 					System.out.println("1. Add item to database");
 					System.out.println("2. Get items about to expire");
 					System.out.println("3. Get needed restock");
 					System.out.println("4. Customer transaction");
 					System.out.println("7. Receive Delivery");
+					System.out.println("9. Get Transaction Total");
 					choice = Integer.parseInt(sc.nextLine());
 					break;
 				} catch (NumberFormatException e) {
@@ -487,16 +507,17 @@ public class Proj2Database {
 	public static float calculatePrice(float price, int qty) {
 		return price * qty;
 	}
-	
+
 	public static void addToItemsBought(Statement stmt, int item, int transactionID, int qty, float price) {
-		String query = "INSERT INTO ItemsBought VALUES(" + item + ", " + transactionID + ", " + qty + ", " + price + ");";
+		String query = "INSERT INTO ItemsBought VALUES(" + item + ", " + transactionID + ", " + qty + ", " + price
+				+ ");";
 		try {
 			stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static Transaction createTransaction(int customerID, int id) {
 		Transaction returnTransaction = new Transaction();
 		returnTransaction.setId(id);
@@ -504,16 +525,16 @@ public class Proj2Database {
 		returnTransaction.setCustomerID(customerID);
 		return returnTransaction;
 	}
-	
+
 	public static void insertTransaction(Statement stmt, Transaction newTransaction) {
-		String query = "INSERT INTO Transactions VALUES(" + newTransaction.getId() + ", " + newTransaction.getDateOfPurchase() + ", " + newTransaction.getCustomerID() + ");";
+		String query = "INSERT INTO Transactions VALUES(" + newTransaction.getId() + ", "
+				+ newTransaction.getDateOfPurchase() + ", " + newTransaction.getCustomerID() + ");";
 		try {
 			stmt.executeUpdate(query);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
-	
 
 	// Apply Coupons to Transactions
 	// If the customer has coupons downloaded the
@@ -526,10 +547,25 @@ public class Proj2Database {
 
 	// Total Transaction Function
 	// Calculates the total for the transaction given
-	public static int totalTransaction(Statement stmt, int transactionID, int customerID) {
-		int total = 0;
+	public static double totalTransaction(Statement stmt, int transactionID, int customerID) {
+		double total = 0;
+		ResultSet rs = null;
+		String query = "SELECT * from ItemsBought WHERE transactionID = " + transactionID;
 		// Locate the transaction and customerID
+		try {
+			rs = stmt.executeQuery(query); // Gather information into rs
+			// At this point, rs should have all of the queries such that transactionID is
+			// correct and what we desire
+			int x = 0;
+			while (rs.next()) {
+				// System.out.println("[" + x + "] Item: " + rs.getString("item")); // Debug
+				// line
+				total += rs.getDouble("price");
+			}
 
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 		// Calculate total
 
 		// Return total // Returns 0 if the transaction does not exist
@@ -553,6 +589,12 @@ public class Proj2Database {
 	// the order not having been added to a delivery yet
 	public static void placeOrder(Statement stmt, int employeeID, int itemID, int amount) {
 		// TODO: STUB
+	}
+
+	// Clear screen function
+	public static void clearScreen() {
+		System.out.print("\033[H\033[2J");
+		System.out.flush();
 	}
 
 }
