@@ -200,6 +200,8 @@ public class Proj2Database {
 					System.out.println("Item not found.");
 				}
 
+			} else if (choice == 7) {
+				System.out.println("Hello there :)");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -210,13 +212,14 @@ public class Proj2Database {
 	public static int homeScreen() {
 		Scanner sc = new Scanner(System.in);
 		int choice = 0;
-		while (choice <= 0 || choice > 4) { // Input must be between 1 and 4
+		while (choice <= 0 || choice > 7) { // Input must be between 1 and 4
 			while (true) {
 				try {
 					System.out.println("1. Add item to database");
 					System.out.println("2. Get items about to expire");
 					System.out.println("3. Get needed restock");
 					System.out.println("4. Customer transaction");
+					System.out.println("7. Receive Delivery");
 					choice = Integer.parseInt(sc.nextLine());
 					break;
 				} catch (NumberFormatException e) {
