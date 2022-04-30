@@ -76,7 +76,9 @@ public class Proj2Database {
 		// String insertQuery3 = "INSERT INTO ExpirationDates VALUES('2022-04-28', 4912,
 		// 3);";
 		String selectQuery = "SELECT * FROM itemsBought;";
-
+		
+		
+		
 		try (Connection conn = ds.getConnection();
 				Statement stmt = conn.createStatement();) {
 			// stmt.executeUpdate(query);
@@ -164,28 +166,34 @@ public class Proj2Database {
 					}
 				}
 			} else if (choice == 4) {
+				
+				ItemBought newItemBought = new ItemBought();
 				System.out.println("Enter item ID: ");
-				int itemID;
-				int customerID;
-				int transactionID;
+
 				int input = readInput();
 				if (itemExists(stmt, input)) {
-					itemID = input;
+					newItemBought.setItemID(input);
 					System.out.println("Input customer ID");
 					input = readInput();
 					if (customerExists(stmt, input)) {
-						customerID = input;
-						System.out.println("Input a transaction ID: ");
+						newItemBought.setCustomerID(input);
+						System.out.println("Input a transaction ID, or enter a new ID to create a new transaction: ");
 						input = readInput();
+						newItemBought.setTransactionID(input);
 						if (transactionExists(stmt, input)) {
-							transactionID = input;
 							System.out.println("How many to purchase?: ");
-							input = readInput();
-							float price = queryPrice(stmt, itemID);
-							System.out.println(price);
-							// calculatePrice(price, input);
+							newItemBought.setQty(readInput());
+							newItemBought.setPrice(queryPrice(stmt, newItemBought.getItemID()));
+							newItemBought.calculatePrice();
+							addToItemsBought(stmt, newItemBought.getItemID(), newItemBought.getTransactionID(), newItemBought.getQty(), newItemBought.getTransactionPrice());
 						} else {
-							// createTransaction(input);
+							Transaction newTransaction = createTransaction(newItemBought.getCustomerID(), newItemBought.getTransactionID());
+							insertTransaction(stmt, newTransaction);
+							System.out.println("How many to purchase?: ");
+							newItemBought.setQty(readInput());
+							newItemBought.setPrice(queryPrice(stmt, newItemBought.getItemID()));
+							newItemBought.calculatePrice();
+							addToItemsBought(stmt, newItemBought.getItemID(), newItemBought.getTransactionID(), newItemBought.getQty(), newItemBought.getTransactionPrice());
 						}
 					}
 				} else {
@@ -472,6 +480,37 @@ public class Proj2Database {
 		System.out.println("Null returning");
 		return 0;
 	}
+
+	public static float calculatePrice(float price, int qty) {
+		return price * qty;
+	}
+	
+	public static void addToItemsBought(Statement stmt, int item, int transactionID, int qty, float price) {
+		String query = "INSERT INTO ItemsBought VALUES(" + item + ", " + transactionID + ", " + qty + ", " + price + ");";
+		try {
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static Transaction createTransaction(int customerID, int id) {
+		Transaction returnTransaction = new Transaction();
+		returnTransaction.setId(id);
+		returnTransaction.createDateOfPurchase();
+		returnTransaction.setCustomerID(customerID);
+		return returnTransaction;
+	}
+	
+	public static void insertTransaction(Statement stmt, Transaction newTransaction) {
+		String query = "INSERT INTO Transactions VALUES(" + newTransaction.getId() + ", " + newTransaction.getDateOfPurchase() + ", " + newTransaction.getCustomerID() + ");";
+		try {
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
 
 	// Apply Coupons to Transactions
 	// If the customer has coupons downloaded the
