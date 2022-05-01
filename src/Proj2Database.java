@@ -36,6 +36,24 @@ public class Proj2Database {
 		// " supplier INT NOT NULL\r\n" +
 		// ");";
 
+		// Query to create Coupons Table
+		// String query = "CREATE TABLE IF NOT EXISTS Coupons(\r\n"
+		// + " amountOff INTEGER NOT NULL,\r\n"
+		// + " id INTEGER NOT NULL,\r\n"
+		// + " item INTEGER NOT NULL,\r\n"
+		// + " itemCountReq INTEGER NOT NULL,\r\n"
+		// + " PRIMARY KEY (id, item),\r\n"
+		// + " FOREIGN KEY (item) REFERENCES Item(upc)\r\n"
+		// + ");";
+
+		// Query for creating ListOfCoupons
+		// String query = "CREATE TABLE IF NOT EXISTS ListOfCoupons(\r\n"
+		// + " id INTEGER NOT NULL,\r\n"
+		// + " customerID INTEGER NOT NULL,\r\n"
+		// + " PRIMARY KEY (id, customerID),\r\n"
+		// + " FOREIGN KEY (customerID) REFERENCES Customer (id)\r\n"
+		// + ");";
+
 		// String query = "CREATE TABLE IF NOT EXISTS ExpirationDates(\r\n"
 		// + " expireDate TEXT NOT NULL,\r\n"
 		// + " item INTEGER NOT NULL,\r\n"
@@ -55,15 +73,16 @@ public class Proj2Database {
 		// + " FOREIGN KEY (itemOrdered) REFERENCES Item(upc),\r\n"
 		// + " FOREIGN KEY (delivery) REFERENCES Delivery(id)\r\n"
 		// + ");";
-		String query = "CREATE TABLE IF NOT EXISTS ItemsBought(\r\n"
-				+ "  item INTEGER NOT NULL,\r\n"
-				+ "  transactionID INTEGER NOT NULL,\r\n"
-				+ "  quantity INTEGER NOT NULL,\r\n"
-				+ "  price NUMERIC NOT NULL,\r\n"
-				+ "  PRIMARY KEY(item, transactionID),\r\n"
-				+ "  FOREIGN KEY(item) REFERENCES Item(upc),\r\n"
-				+ "  FOREIGN KEY(transactionID) REFERENCES Transactions(id)\r\n"
-				+ ");";
+
+		// String query = "CREATE TABLE IF NOT EXISTS ItemsBought(\r\n"
+		// + " item INTEGER NOT NULL,\r\n"
+		// + " transactionID INTEGER NOT NULL,\r\n"
+		// + " quantity INTEGER NOT NULL,\r\n"
+		// + " price NUMERIC NOT NULL,\r\n"
+		// + " PRIMARY KEY(item, transactionID),\r\n"
+		// + " FOREIGN KEY(item) REFERENCES Item(upc),\r\n"
+		// + " FOREIGN KEY(transactionID) REFERENCES Transactions(id)\r\n"
+		// + ");";
 
 		// String insertQuery = "INSERT INTO Orders VALUES(42, 4798, 32, '2022-01-14',
 		// TRUE, 2341);";
@@ -542,7 +561,49 @@ public class Proj2Database {
 	// item price shows up on the transaction assuming the
 	// condition of the individual coupons were met.
 	public static void applyCoupon(Statement stmt, int transactionID, int customerID) { // TODO: Is this void?
-		// TODO: STUB
+		ResultSet rs = null;
+		String query = "SELECT * from ListOfCoupons WHERE customerID = " + customerID;
+		int couponCount = 0;
+		int[] couponListInt = new int[10]; // Create a list of 10 coupons max per customer
+		String couponList = "";
+
+		try {
+			rs = stmt.executeQuery(query); // Gather information into rs
+
+			couponCount = rs.getFetchSize();
+
+			if (couponCount == 0) {
+				// Error, no coupons found
+				System.out.println("\nERROR: No coupons found for customer #" + customerID + "!\n");
+				return; // Exit this function
+			}
+
+			int x = 0; // Counter
+			while (rs.next()) {
+				couponListInt[x] = rs.getInt("id");
+			}
+			// By this point, couponList will contain all the coupons a customer has of size
+			// couponCount
+			// Now lets have the user decide which coupon they want to use
+
+			// USER DECIDES WHICH COUPON TO USE
+
+			// Now that we have the specific coupon in mind, we need to gather a list of
+			// transactions in the customers ID for them to choose which to apply to
+
+			// DISPLAY LIST OF TRANSACTIONS FROM CUSTOMER
+
+			// GET USER INPUT AND SELECT TRANSACTION
+
+			// CHECK IF COUPON IS ABLE TO APPLY TO PRODUCTS WITHIN TRANSACTION SELECTED
+
+			// ERROR: UNABLE TO APPLY COUPON DUE TO COUPON IS FOR ITEM ID #XXXX
+			// RESULT: APPLIED COUPON SUCCESSFULLY TO TRANSACTION. COUPON HAS BEEN CONSUMED.
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	// Total Transaction Function
@@ -551,12 +612,13 @@ public class Proj2Database {
 		double total = 0;
 		ResultSet rs = null;
 		String query = "SELECT * from ItemsBought WHERE transactionID = " + transactionID;
+
 		// Locate the transaction and customerID
 		try {
 			rs = stmt.executeQuery(query); // Gather information into rs
 			// At this point, rs should have all of the queries such that transactionID is
 			// correct and what we desire
-			int x = 0;
+			// int x = 0;
 			while (rs.next()) {
 				// System.out.println("[" + x + "] Item: " + rs.getString("item")); // Debug
 				// line
