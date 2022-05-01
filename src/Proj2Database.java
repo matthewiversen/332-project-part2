@@ -22,10 +22,9 @@ public class Proj2Database {
 			System.exit(0);
 		}
 
-		
 		try (Connection conn = ds.getConnection();
 				Statement stmt = conn.createStatement();) {
-			
+
 			LocalDate date = LocalDate.now();
 			System.out.println(date.toString());
 
@@ -43,7 +42,7 @@ public class Proj2Database {
 																		// 2 days of current date
 				System.out.println("Items about to expire:");
 				printAll(expiringItems);
-				
+
 			} else if (choice == 3) {
 				int input = readInteger("Input a department number: ");
 
@@ -68,7 +67,7 @@ public class Proj2Database {
 					}
 					System.out.println("Items needing restock: ");
 					printAll(itemsToOrder);
-					
+
 					if (previousOrderIDs.size() > 0) {
 						System.out.println("Previous Order IDs for these items: ");
 						printAll(previousOrderIDs);
@@ -79,34 +78,34 @@ public class Proj2Database {
 			} else if (choice == 4) {
 				ItemBought newItemBought = orderItem(stmt);
 				insertItemBought(stmt, newItemBought);
-				
+
 			} else if (choice == 7) {
 				System.out.println("Hello there :)");
 			} else if (choice == 8) {
 				// Apply Coupon to transaction option
 				clearScreen();
 
-				System.out.print("\n\t===== TRANSACTION MODIFICATION - COUPONS =====\n\nPlease enter customer ID: ");
-				// int custId = readInput(); --update to work with new readInteger func
-				System.out.print("Please enter transaction ID");
-				// int tId = readInput(); --update to work with new readInteger func
-				// applyCoupon(stmt, tId, custId);
+				System.out.print("\n\t===== TRANSACTION MODIFICATION - COUPONS =====\n\n");
+				int custId = readInteger("Please enter customer ID: ");
+				int tId = readInteger("Please enter transaction ID");
+				applyCoupon(stmt, tId, custId);
 
 			} else if (choice == 9) {
 				// Total Transaction Option
 				clearScreen();
 
-				System.out.print("\n\t===== TRANSACTION TOTAL INQUIRY =====\n\nPlease enter transaction ID: ");
-				//int tId = readInput(); //update to work with new readInteger func
-				System.out.print("Please enter customer ID: ");
-				//int custId = readInput(); //update to work with new readInteger func
-				//double total = totalTransaction(stmt, tId, custId);
+				System.out.print("\n\t===== TRANSACTION TOTAL INQUIRY =====\n\n");
+				int tId = readInteger("Please enter transaction ID: ");
+				int custId = readInteger("Please enter customer ID: ");
+				double total = totalTransaction(stmt, tId, custId);
 
-				/*if (total == 0.0) {
+				if (total == 0.0) {
 					System.out.println("\nERROR: Transaction not found!\n");
 				} else {
-					System.out.println("\nTotal for Transaction (#" + tId + "): $ " + total + "\n");
-				}*/
+					System.out.println("\nTotal for Transaction (#" + tId + "): $ " + total +
+							"\n");
+				}
+
 			}
 
 		} catch (SQLException e) {
@@ -349,7 +348,7 @@ public class Proj2Database {
 		int input;
 		while (true) { // This while loop controls invalid input by attempting to cast input as an
 						// Integer
-			System.out.println(message);
+			System.out.print(message);
 			try {
 				input = Integer.parseInt(sc.nextLine()); // Reads input from console
 				return input;
@@ -398,8 +397,11 @@ public class Proj2Database {
 		return price * qty;
 	}
 
-	public static void insertItemBought(Statement stmt, ItemBought newItemBought) {//int item, int transactionID, int qty, float price) {
-		String query = "INSERT INTO ItemsBought VALUES(" + newItemBought.getItemID() + ", " + newItemBought.getTransactionID() + ", " + newItemBought.getQty() + ", " + newItemBought.getTransactionPrice()
+	public static void insertItemBought(Statement stmt, ItemBought newItemBought) {// int item, int transactionID, int
+																					// qty, float price) {
+		String query = "INSERT INTO ItemsBought VALUES(" + newItemBought.getItemID() + ", "
+				+ newItemBought.getTransactionID() + ", " + newItemBought.getQty() + ", "
+				+ newItemBought.getTransactionPrice()
 				+ ");";
 		try {
 			stmt.executeUpdate(query);
@@ -562,15 +564,16 @@ public class Proj2Database {
 		System.out.print("\033[H\033[2J");
 		System.out.flush();
 	}
-	
+
 	public static void printAll(ArrayList<Integer> list) {
-		for(int i = 0; i < list.size(); i++) {
+		for (int i = 0; i < list.size(); i++) {
 			System.out.println(list.get(i));
 		}
 	}
+
 	public static ItemBought orderItem(Statement stmt) throws SQLException {
-		//ItemBought newItemBought = new ItemBought();
-		//newItemBought = createItemBought()
+		// ItemBought newItemBought = new ItemBought();
+		// newItemBought = createItemBought()
 		int item;
 		int customer;
 		int transaction;
@@ -579,7 +582,7 @@ public class Proj2Database {
 		int input = readInteger("Enter item ID: ");
 		if (itemExists(stmt, input)) {
 			item = input;
-			//newItemBought.setItemID(input);
+			// newItemBought.setItemID(input);
 			input = readInteger("Enter Customer ID: ");
 			if (customerExists(stmt, input)) {
 				customer = input;
@@ -600,6 +603,7 @@ public class Proj2Database {
 		}
 		return null;
 	}
+
 	public static ItemBought createItemBought(Statement stmt, int item, int customer, int transaction) {
 		ItemBought newItemBought = new ItemBought();
 		newItemBought.setItemID(item);
