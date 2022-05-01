@@ -222,6 +222,16 @@ public class Proj2Database {
 
 			} else if (choice == 7) {
 				System.out.println("Hello there :)");
+			} else if (choice == 8) {
+				// Apply Coupon to transaction option
+				clearScreen();
+
+				System.out.print("\n\t===== TRANSACTION MODIFICATION - COUPONS =====\n\nPlease enter customer ID: ");
+				int custId = readInput();
+				System.out.print("Please enter transaction ID");
+				int tId = readInput();
+				applyCoupon(stmt, tId, custId);
+
 			} else if (choice == 9) {
 				// Total Transaction Option
 				clearScreen();
@@ -258,6 +268,7 @@ public class Proj2Database {
 					System.out.println("3. Get needed restock");
 					System.out.println("4. Customer transaction");
 					System.out.println("7. Receive Delivery");
+					System.out.println("8. Apply coupon to transaction");
 					System.out.println("9. Get Transaction Total");
 					choice = Integer.parseInt(sc.nextLine());
 					break;
@@ -561,26 +572,57 @@ public class Proj2Database {
 	// item price shows up on the transaction assuming the
 	// condition of the individual coupons were met.
 	public static void applyCoupon(Statement stmt, int transactionID, int customerID) { // TODO: Is this void?
-		ResultSet rs = null;
+
+		// Get list of coupons that customer can apply
+		// ResultSet custCoupons = getCustomerCoupons(stmt, custId);
+
+		// Get coupons info using
+
+		// System.out.println("\tCOUPON LIST: \n#\tItem #\t$ off\tCount Req.");
+		// while (custCoupons.next()) {
+		// String query1 = "SELECT * FROM Coupons WHERE id = " +
+		// custCoupons.getInt("id");
+		// ResultSet currentCoupon = getCouponInfo(stmt, custCoupons.getInt("id"));
+
+		// // Print entire list of coupons available to customer
+		// System.out.println(custCoupons.getInt("id") + "\t" +
+		// currentCoupon.getInt("item") + "\t"
+		// + currentCoupon.getInt("amountOff") + "\t" +
+		// currentCoupon.getInt("itemCountReq"));
+		// }
+
+		// Have user select coupon to use, then gather available transactions that the
+		// user can select from
+
 		String query = "SELECT * from ListOfCoupons WHERE customerID = " + customerID;
 		int couponCount = 0;
-		int[] couponListInt = new int[10]; // Create a list of 10 coupons max per customer
-		String couponList = "";
-
 		try {
-			rs = stmt.executeQuery(query); // Gather information into rs
+			ResultSet rs = stmt.executeQuery(query); // Gather information into rs
 
 			couponCount = rs.getFetchSize();
-
+			// TODO: Fix how to find coupon Count!
 			if (couponCount == 0) {
 				// Error, no coupons found
 				System.out.println("\nERROR: No coupons found for customer #" + customerID + "!\n");
 				return; // Exit this function
 			}
 
-			int x = 0; // Counter
+			// Get coupons info using
+
+			System.out.println("\tCOUPON LIST: \n#\tItem #\t$ off\tCount Req.");
 			while (rs.next()) {
-				couponListInt[x] = rs.getInt("id");
+				String query1 = "SELECT * FROM Coupons WHERE id = " + rs.getInt("id");
+				try {
+					ResultSet currentCoupon = stmt.executeQuery(query1);
+
+					// Print entire list of coupons available to customer
+					System.out.println(rs.getInt("id") + "\t" + currentCoupon.getInt("item") + "\t"
+							+ currentCoupon.getInt("amountOff") + "\t" + currentCoupon.getInt("itemCountReq"));
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+
 			}
 			// By this point, couponList will contain all the coupons a customer has of size
 			// couponCount
