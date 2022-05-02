@@ -79,11 +79,7 @@ public class Proj2Database {
 				ItemBought newItemBought = orderItem(stmt);
 				insertItemBought(stmt, newItemBought);
 
-			} else if (choice == 7) {
-				int deliveryID = readInteger("Please enter ID of delivery you have received: ");
-				receiveDelivery(stmt, deliveryID);
-
-			} else if (choice == 8) {
+			} else if (choice == 5) {
 				// Apply Coupon to transaction option
 				clearScreen();
 
@@ -92,7 +88,7 @@ public class Proj2Database {
 				int tId = readInteger("Please enter transaction ID");
 				applyCoupon(stmt, tId, custId);
 
-			} else if (choice == 9) {
+			} else if (choice == 6) {
 				// Total Transaction Option
 				clearScreen();
 
@@ -108,7 +104,22 @@ public class Proj2Database {
 							"\n");
 				}
 
+			} else if (choice == 7) {
+				// receive delivery 
+
+				int deliveryID = readInteger("Please enter ID of delivery you have received: ");
+				receiveDelivery(stmt, deliveryID);
+
+			} else if (choice == 8) {
+				// place order by employee
+
+				int employeeID = readInteger("Employee ID: ");
+				int itemID = readInteger("Item ID: ");
+				int quantity = readInteger("Quantity of ItemID:" + itemID + " you are purchasing: ");
+				employeePlaceOrder(stmt, employeeID, itemID, quantity);
+				
 			}
+			
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -119,7 +130,7 @@ public class Proj2Database {
 	public static int homeScreen() {
 		Scanner sc = new Scanner(System.in);
 		int choice = 0;
-		while (choice <= 0 || choice > 9) { // Input must be between 1 and 4
+		while (choice <= 0 || choice >= 9) { // Input must be between 1 and 8
 			while (true) {
 				try {
 					clearScreen();
@@ -128,9 +139,11 @@ public class Proj2Database {
 					System.out.println("2. Get items about to expire");
 					System.out.println("3. Get needed restock");
 					System.out.println("4. Customer transaction");
+					System.out.println("5. Apply coupon to transaction");
+					System.out.println("6. Get Transaction Total");
 					System.out.println("7. Receive Delivery");
-					System.out.println("8. Apply coupon to transaction");
-					System.out.println("9. Get Transaction Total");
+					System.out.println("8. Place order by employee");
+
 					choice = Integer.parseInt(sc.nextLine());
 					break;
 				} catch (NumberFormatException e) {
@@ -575,8 +588,12 @@ public class Proj2Database {
 	// permission and reject the order
 	// If the employee does have permission then add the order to the database with
 	// the order not having been added to a delivery yet
-	public static void placeOrder(Statement stmt, int employeeID, int itemID, int amount) {
-		// TODO: STUB
+	public static void employeePlaceOrder(Statement stmt, int employeeID, int itemID, int quantity) {
+		System.out.print("employeeID: " + employeeID + "\n");
+		System.out.print("itemID: " + itemID + "\n");
+		System.out.print("quantity: " + quantity + "\n");
+		
+		
 	}
 
 	// Clear screen function
