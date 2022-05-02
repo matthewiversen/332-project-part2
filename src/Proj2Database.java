@@ -525,6 +525,18 @@ public class Proj2Database {
 			}
 			System.out.println("There were " + changes + " changes done to the SQL. Successfully. \n");
 		}
+		String q4 = "DELETE FROM ListOfCoupons WHERE customerID = " + customerID + " AND id = " + couponId;
+		int delete = 0;
+		try {
+			delete = stmt.executeUpdate(q4);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		if (delete == 1) {
+			System.out.println("Coupon has been consumed. \n");
+		} else {
+			System.out.println("Coupon failed to be consumed. \n");
+		}
 	}
 
 	// Total Transaction Function
