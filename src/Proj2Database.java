@@ -85,7 +85,7 @@ public class Proj2Database {
 
 				System.out.print("\n\t===== TRANSACTION MODIFICATION - COUPONS =====\n\n");
 				int custId = readInteger("Please enter customer ID: ");
-				int tId = readInteger("Please enter transaction ID");
+				int tId = readInteger("Please enter transaction ID: ");
 				applyCoupon(stmt, tId, custId);
 
 			} else if (choice == 6) {
@@ -105,7 +105,7 @@ public class Proj2Database {
 				}
 
 			} else if (choice == 7) {
-				// receive delivery 
+				// receive delivery
 
 				int deliveryID = readInteger("Please enter ID of delivery you have received: ");
 				receiveDelivery(stmt, deliveryID);
@@ -117,9 +117,8 @@ public class Proj2Database {
 				int itemID = readInteger("Item ID: ");
 				int quantity = readInteger("Quantity of ItemID:" + itemID + " you are purchasing: ");
 				employeePlaceOrder(stmt, employeeID, itemID, quantity);
-				
+
 			}
-			
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -451,80 +450,81 @@ public class Proj2Database {
 	// item price shows up on the transaction assuming the
 	// condition of the individual coupons were met.
 	public static void applyCoupon(Statement stmt, int transactionID, int customerID) { // TODO: Is this void?
-
-		// Get list of coupons that customer can apply
-		// ResultSet custCoupons = getCustomerCoupons(stmt, custId);
-
-		// Get coupons info using
-
-		// System.out.println("\tCOUPON LIST: \n#\tItem #\t$ off\tCount Req.");
-		// while (custCoupons.next()) {
-		// String query1 = "SELECT * FROM Coupons WHERE id = " +
-		// custCoupons.getInt("id");
-		// ResultSet currentCoupon = getCouponInfo(stmt, custCoupons.getInt("id"));
-
-		// // Print entire list of coupons available to customer
-		// System.out.println(custCoupons.getInt("id") + "\t" +
-		// currentCoupon.getInt("item") + "\t"
-		// + currentCoupon.getInt("amountOff") + "\t" +
-		// currentCoupon.getInt("itemCountReq"));
-		// }
-
-		// Have user select coupon to use, then gather available transactions that the
-		// user can select from
-
 		String query = "SELECT * from ListOfCoupons WHERE customerID = " + customerID;
 		int couponCount = 0;
+		int[] couponIdList = new int[10];
 		try {
 			ResultSet rs = stmt.executeQuery(query); // Gather information into rs
-
-			couponCount = rs.getFetchSize();
-			// TODO: Fix how to find coupon Count!
-			if (couponCount == 0) {
-				// Error, no coupons found
+			int x = 0;
+			while (rs.next()) {
+				couponIdList[x] = rs.getInt("id");
+				couponCount++;
+			}
+			if (couponCount == 0) { // Error, no coupons found
 				System.out.println("\nERROR: No coupons found for customer #" + customerID + "!\n");
 				return; // Exit this function
 			}
-
-			// Get coupons info using
-
-			System.out.println("\tCOUPON LIST: \n#\tItem #\t$ off\tCount Req.");
-			while (rs.next()) {
-				String query1 = "SELECT * FROM Coupons WHERE id = " + rs.getInt("id");
-				try {
-					ResultSet currentCoupon = stmt.executeQuery(query1);
-
-					// Print entire list of coupons available to customer
-					System.out.println(rs.getInt("id") + "\t" + currentCoupon.getInt("item") + "\t"
-							+ currentCoupon.getInt("amountOff") + "\t" + currentCoupon.getInt("itemCountReq"));
-
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-
-			}
-			// By this point, couponList will contain all the coupons a customer has of size
-			// couponCount
-			// Now lets have the user decide which coupon they want to use
-
-			// USER DECIDES WHICH COUPON TO USE
-
-			// Now that we have the specific coupon in mind, we need to gather a list of
-			// transactions in the customers ID for them to choose which to apply to
-
-			// DISPLAY LIST OF TRANSACTIONS FROM CUSTOMER
-
-			// GET USER INPUT AND SELECT TRANSACTION
-
-			// CHECK IF COUPON IS ABLE TO APPLY TO PRODUCTS WITHIN TRANSACTION SELECTED
-
-			// ERROR: UNABLE TO APPLY COUPON DUE TO COUPON IS FOR ITEM ID #XXXX
-			// RESULT: APPLIED COUPON SUCCESSFULLY TO TRANSACTION. COUPON HAS BEEN CONSUMED.
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-
+		System.out.println("\n\t===  COUPON LIST  === \n\n#\tItem #\t$ off\tCount Req.");
+		for (int x = 0; x < couponCount; x++) {
+			String query1 = "SELECT * FROM Coupons WHERE id = " + couponIdList[x];
+			try {
+				ResultSet currentCoupon = stmt.executeQuery(query1);
+				// Print entire list of coupons available to customer
+				System.out.println(couponIdList[x] + "\t" + currentCoupon.getInt("item") + "\t"
+						+ currentCoupon.getInt("amountOff") + "\t" + currentCoupon.getInt("itemCountReq"));
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		int choice = 0;
+		choice = readInteger("\nPlease choose a coupon to apply to transaction: ");
+		boolean valid = false;
+		for (int x = 0; x < couponCount; x++) {
+			if (choice == couponIdList[x])
+				valid = true;
+		}
+		if (!valid)
+			System.out.println("ERROR: Coupon not found for input. Exiting.\n");
+		int couponId = choice, cItemId = 0, cAmountOff = 0, cItemCountReq = 0;
+		String q1 = "SELECT * FROM Coupons WHERE id = " + couponId;
+		try {
+			ResultSet finalCoupon = stmt.executeQuery(q1);
+			cItemId = finalCoupon.getInt("item");
+			cAmountOff = finalCoupon.getInt("amountOff");
+			cItemCountReq = finalCoupon.getInt("itemCountReq");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		String q2 = "SELECT * FROM ItemsBought WHERE transactionID = " + transactionID + " AND item = " + cItemId;
+		int quantity = 0;
+		double price = 0;
+		try {
+			ResultSet result = stmt.executeQuery(q2);
+			quantity = result.getInt("quantity");
+			price = result.getDouble("price");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		boolean minItemReq = false;
+		if (quantity >= cItemCountReq)
+			minItemReq = true;
+		if (minItemReq == false) {
+			System.out.println("ERROR: Minimum item purchase requirement not met in transaction. Exiting.\n");
+		} else { // Min req met, applying coupon
+			price -= cAmountOff * quantity;
+			String q3 = "UPDATE ItemsBought SET price = " + price + " WHERE transactionID = " + transactionID
+					+ " AND item = " + cItemId;
+			int changes = 0;
+			try {
+				changes = stmt.executeUpdate(q3);
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+			System.out.println("There were " + changes + " changes done to the SQL. Successfully. \n");
+		}
 	}
 
 	// Total Transaction Function
@@ -564,7 +564,7 @@ public class Proj2Database {
 		int totalOrders = 0, totalDelivery = 0;
 
 		System.out.print("Here is the deliveryID to be deleted: " + deliveryID + "\n");
-		
+
 		// select statements to check for valid IDs
 		String selectQuery = ("SELECT delivery FROM Orders WHERE delivery = " + deliveryID);
 		String selectQuery2 = ("SELECT id FROM Delivery WHERE id = " + deliveryID);
@@ -620,8 +620,7 @@ public class Proj2Database {
 		System.out.print("employeeID: " + employeeID + "\n");
 		System.out.print("itemID: " + itemID + "\n");
 		System.out.print("quantity: " + quantity + "\n");
-		
-		
+
 	}
 
 	// Clear screen function
