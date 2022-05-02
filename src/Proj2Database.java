@@ -80,7 +80,9 @@ public class Proj2Database {
 				insertItemBought(stmt, newItemBought);
 
 			} else if (choice == 7) {
-				System.out.println("Hello there :)");
+				int deliveryID = readInteger("Please enter ID of delivery you have received: ");
+				receiveDelivery(stmt, deliveryID);
+
 			} else if (choice == 8) {
 				// Apply Coupon to transaction option
 				clearScreen();
@@ -546,7 +548,8 @@ public class Proj2Database {
 	// database
 	// Should add the number of each item received to the stock of that item
 	public static void receiveDelivery(Statement stmt, int deliveryID) {
-		// TODO: STUB
+		System.out.print("Here is the deliverID to be deleted: " + deliveryID);
+
 	}
 
 	// Place order by employee
