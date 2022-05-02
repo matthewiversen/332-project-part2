@@ -548,8 +548,25 @@ public class Proj2Database {
 	// database
 	// Should add the number of each item received to the stock of that item
 	public static void receiveDelivery(Statement stmt, int deliveryID) {
-		System.out.print("Here is the deliverID to be deleted: " + deliveryID);
+		
+		System.out.print("Here is the deliverID to be deleted: " + deliveryID + "\n");
+		
+		String query = ("DELETE FROM Orders WHERE delivery = " + deliveryID);
+		String query2 = ("DELETE FROM Delivery WHERE id = " + deliveryID);
+		
+		// delete orders
+		try {
+			stmt.executeUpdate(query);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
+		// delete delivery
+		try {
+			stmt.executeUpdate(query2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Place order by employee
