@@ -560,23 +560,51 @@ public class Proj2Database {
 	// Should remove The delivery and any orders associated with it from the
 	// database
 	// Should add the number of each item received to the stock of that item
-	public static void receiveDelivery(Statement stmt, int deliveryID) {
+	public static void receiveDelivery(Statement stmt, int deliveryID) throws SQLException {
+		int totalOrders = 0, totalDelivery = 0;
+
+		System.out.print("Here is the deliveryID to be deleted: " + deliveryID + "\n");
 		
-		System.out.print("Here is the deliverID to be deleted: " + deliveryID + "\n");
-		
+		// select statements to check for valid IDs
+		String selectQuery = ("SELECT delivery FROM Orders WHERE delivery = " + deliveryID);
+		String selectQuery2 = ("SELECT id FROM Delivery WHERE id = " + deliveryID);
+
+		// delete statements
 		String query = ("DELETE FROM Orders WHERE delivery = " + deliveryID);
 		String query2 = ("DELETE FROM Delivery WHERE id = " + deliveryID);
-		
-		// delete orders
+
+		// totalOrders != 0 when there is a valid delivery
 		try {
-			stmt.executeUpdate(query);
+			ResultSet ordersReturn = stmt.executeQuery(selectQuery);
+
+			while (ordersReturn.next()) {
+				totalOrders += ordersReturn.getInt("delivery");
+			}
+
+			if (totalOrders != 0) {
+				stmt.executeUpdate(query);
+			} else {
+				System.out.print("That delivery is not in the Orders table.");
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
-		// delete delivery
+		// totalDelivery != 0 when there is a valid delivery
 		try {
-			stmt.executeUpdate(query2);
+			ResultSet deliveryReturn = stmt.executeQuery(selectQuery2);
+
+			while (deliveryReturn.next()) {
+				totalDelivery += deliveryReturn.getInt("id");
+			}
+
+			if (totalDelivery != 0) {
+				stmt.executeUpdate(query2);
+			} else {
+				System.out.print("That delivery is not in the Delivery table.");
+			}
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
