@@ -1,8 +1,12 @@
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.time.LocalDate;
+//import java.time.Instant;
+//import java.time.LocalDate;
+import java.time.*;
+//import java.time.ZoneId;
 import java.util.Scanner;
 
 import org.sqlite.SQLiteDataSource;
@@ -24,15 +28,26 @@ public class Proj2Database {
 
 		try (Connection conn = ds.getConnection();
 				Statement stmt = conn.createStatement();) {
+//			String uQuery = "ALTER TABLE Transactions MODIFY COLUMN dateOfPurchase Text";
+//			stmt.executeUpdate(uQuery);
+//			String query = "SELECT * FROM Transactions;";
+//			ResultSet rsq = stmt.executeQuery(query);
+//			ResultSetMetaData rsmd = rsq.getMetaData();
+//			String column_name = rsmd.getColumnTypeName(1);
+//			System.out.println("Data type: " + column_name);
 
-			LocalDate date = LocalDate.now();
-			System.out.println(date.toString());
+			long milliseconds = 1486815313230L;
+			LocalDateTime cvDate =
+			    Instant.ofEpochMilli(milliseconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
+			System.out.println(cvDate.toString());
+
+					
 
 			int choice = homeScreen();
 			if (choice == 1) {
 
-				Item newItem = createItem();
-				insertNewItem(newItem, stmt);
+				Item newItem = createItem(); //Create a new item from user input
+				insertNewItem(newItem, stmt); //Insert the new item into the Item table
 
 			} else if (choice == 2) {
 				int input = readInteger("Input a department");
@@ -41,7 +56,7 @@ public class Proj2Database {
 				ArrayList<Integer> expiringItems = fillItemsArray(rs); // Creates an arraylist of items w/ dates within
 																		// 2 days of current date
 				System.out.println("Items about to expire:");
-				printAll(expiringItems);
+				printAll(expiringItems); //printAll loops through an array list and prints every element
 
 			} else if (choice == 3) {
 				int input = readInteger("Input a department number: ");
@@ -54,7 +69,7 @@ public class Proj2Database {
 																					// been previously made for items
 																					// that are currently low on stock
 				if (rsItems.isClosed()) { // If the SQL query returns a closed set, the database inputed doesn't exist.
-					System.out.println("Department doesn't exist or invalid input.");
+					System.out.println("Department doesn't exist.");
 				} else {
 					while (rsItems.next()) {
 						itemsToOrder.add(rsItems.getInt("upc"));
