@@ -115,7 +115,8 @@ public class Proj2Database {
 
 				int employeeID = readInteger("Employee ID: ");
 				int itemID = readInteger("Item ID: ");
-				int quantity = readInteger("Quantity of ItemID:" + itemID + " you are purchasing: ");
+				int quantity = readInteger("Quantity: ");
+				System.out.print("\n");
 				employeePlaceOrder(stmt, employeeID, itemID, quantity);
 
 			}
@@ -650,11 +651,46 @@ public class Proj2Database {
 	// permission and reject the order
 	// If the employee does have permission then add the order to the database with
 	// the order not having been added to a delivery yet
-	public static void employeePlaceOrder(Statement stmt, int employeeID, int itemID, int quantity) {
-		System.out.print("employeeID: " + employeeID + "\n");
-		System.out.print("itemID: " + itemID + "\n");
-		System.out.print("quantity: " + quantity + "\n");
+	public static void employeePlaceOrder(Statement stmt, int employeeID, int itemID, int quantity)
+			throws SQLException {
+		
+		int itemTotal = 0, employeeTotal = 0;
 
+		String selectQuery = ("SELECT permissionLVL FROM Employee WHERE id = " + employeeID);
+		String selectQuery2 = ("SELECT upc FROM Item WHERE upc = " + itemID);
+		String selectQuery3 = ("SELECT id from Employee WHERE id = " + employeeID);
+
+		// check for a valid employee id
+		ResultSet employeeIDReturn = stmt.executeQuery(selectQuery3);
+		while (employeeIDReturn.next()) {
+			employeeTotal += employeeIDReturn.getInt("id");
+		}
+		
+		if (employeeTotal != 0) {
+			ResultSet employeeLVLReturn = stmt.executeQuery(selectQuery);
+			int permissionLVL = employeeLVLReturn.getInt("permissionLVL");
+
+			if (permissionLVL == 1) {
+				// check for a valid item
+				ResultSet itemReturn = stmt.executeQuery(selectQuery2);
+				while (itemReturn.next()) {
+					itemTotal += itemReturn.getInt("upc");
+				}
+
+				// if there is a valid item in the Item table, then you can make an order
+				if (itemTotal != 0) {
+					//System.out.print("That is a valid item.");
+					String insertQuery = ( "INSERT INTO Orders (id, itemOrdered, qty, orderDate, onDelivery, delivery) VALUES ('15', '" + String.valueOf(itemID) + "', '" + String.valueOf(quantity) + "', '2022-05-03', '0', NULL)");
+					stmt.executeUpdate(insertQuery);
+				} else {
+					System.out.print("That is not a valid item.");
+				}
+			} else {
+				System.out.print("Invalid permission level.");
+			}
+		} else {
+			System.out.print("That is not a valid employeeID.");
+		}
 	}
 
 	// Clear screen function
