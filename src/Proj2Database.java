@@ -107,7 +107,7 @@ public class Proj2Database {
 			} else if (choice == 7) {
 				// receive delivery
 
-				int deliveryID = readInteger("Please enter ID of delivery you have received: ");
+				int deliveryID = readInteger("\nPlease enter ID of delivery you have received: ");
 				receiveDelivery(stmt, deliveryID);
 
 			} else if (choice == 8) {
@@ -573,32 +573,22 @@ public class Proj2Database {
 	// database
 	// Should add the number of each item received to the stock of that item
 	public static void receiveDelivery(Statement stmt, int deliveryID) throws SQLException {
+		
 		int totalOrders = 0, totalDelivery = 0;
-
 		System.out.print("\n");
 
 		// select statements to check for valid IDs
 		String selectQuery = ("SELECT delivery FROM Orders WHERE delivery = " + deliveryID);
 		String selectQuery2 = ("SELECT id FROM Delivery WHERE id = " + deliveryID);
-		String selectQuery3 = ("SELECT itemOrdered FROM Orders WHERE delivery = " + deliveryID);
-		ResultSet itemReturn = stmt.executeQuery(selectQuery3);
-		//while (itemReturn.next()) {
-		int itemOrdered = itemReturn.getInt("itemOrdered");
-		//}
-
-		System.out.print("itemOrdered: " + itemOrdered + "\n");
-
+		String selectQuery3 = ("SELECT itemOrdered, qty FROM Orders WHERE delivery = " + deliveryID);
 		
-		
-		// update statement to add the stock
-		String updateQuery = ("UPDATE Item SET currentStock = currentStock +  ");
-
 		// delete statements
 		String query = ("DELETE FROM Orders WHERE delivery = " + deliveryID);
 		String query2 = ("DELETE FROM Delivery WHERE id = " + deliveryID);
 
-		// totalOrders != 0 when there is a valid delivery
+		// totalOrders != 0 when there is a valid delivery in Orders table
 		try {
+
 			ResultSet ordersReturn = stmt.executeQuery(selectQuery);
 
 			while (ordersReturn.next()) {
@@ -606,8 +596,23 @@ public class Proj2Database {
 			}
 
 			if (totalOrders != 0) {
+
+				// get itemOrdered and qty of the delivery in Orders table
+				ResultSet itemReturn = stmt.executeQuery(selectQuery3);
+				int itemOrdered = itemReturn.getInt("itemOrdered");
+				int quantity = itemReturn.getInt("qty");
+				System.out.print("itemOrdered: " + String.valueOf(itemOrdered) + "\n");
+				System.out.print("quantity added to item: " + String.valueOf(quantity) + "\n");
 				System.out.print("ID found in Orders table, now deleting..." + "\n");
-				//stmt.executeUpdate(query);
+
+				// update statement to add the stock of delivery in Item table
+				String updateQuery = ("UPDATE Item SET currentStock = currentStock +  "
+					+ (String.valueOf(quantity)) + " WHERE upc = " + String.valueOf(itemOrdered));
+				stmt.executeUpdate(updateQuery);
+
+				// delete statement for Orders table
+				stmt.executeUpdate(query);
+
 			} else {
 				System.out.print("That delivery is not in the Orders table." + "\n");
 			}
@@ -618,6 +623,7 @@ public class Proj2Database {
 
 		// totalDelivery != 0 when there is a valid delivery
 		try {
+
 			ResultSet deliveryReturn = stmt.executeQuery(selectQuery2);
 
 			while (deliveryReturn.next()) {
@@ -625,8 +631,10 @@ public class Proj2Database {
 			}
 
 			if (totalDelivery != 0) {
+
 				System.out.print("ID found in Delivery table, now deleting..." + "\n");
-				//stmt.executeUpdate(query2);
+				stmt.executeUpdate(query2);
+
 			} else {
 				System.out.print("That delivery is not in the Delivery table." + "\n");
 			}
