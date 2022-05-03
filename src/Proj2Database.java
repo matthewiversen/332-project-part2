@@ -1,12 +1,8 @@
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-//import java.time.Instant;
-//import java.time.LocalDate;
 import java.time.*;
-//import java.time.ZoneId;
 import java.util.Scanner;
 
 import org.sqlite.SQLiteDataSource;
@@ -27,21 +23,7 @@ public class Proj2Database {
 		}
 
 		try (Connection conn = ds.getConnection();
-				Statement stmt = conn.createStatement();) {
-//			String uQuery = "ALTER TABLE Transactions MODIFY COLUMN dateOfPurchase Text";
-//			stmt.executeUpdate(uQuery);
-//			String query = "SELECT * FROM Transactions;";
-//			ResultSet rsq = stmt.executeQuery(query);
-//			ResultSetMetaData rsmd = rsq.getMetaData();
-//			String column_name = rsmd.getColumnTypeName(1);
-//			System.out.println("Data type: " + column_name);
-
-			long milliseconds = 1486815313230L;
-			LocalDateTime cvDate =
-			    Instant.ofEpochMilli(milliseconds).atZone(ZoneId.systemDefault()).toLocalDateTime();
-			System.out.println(cvDate.toString());
-
-					
+				Statement stmt = conn.createStatement();) {		
 
 			int choice = homeScreen();
 			if (choice == 1) {
@@ -444,15 +426,13 @@ public class Proj2Database {
 		Transaction returnTransaction = new Transaction();
 		returnTransaction.setId(id);
 		returnTransaction.createDateOfPurchase();
-		System.out.println("Main dop: " + returnTransaction.getDateOfPurchase());
 		returnTransaction.setCustomerID(customerID);
 		return returnTransaction;
 	}
 
 	public static void insertTransaction(Statement stmt, Transaction newTransaction) {
-		System.out.println("insert dop: " + newTransaction.getDateOfPurchase());
-		String query = "INSERT INTO Transactions VALUES(" + newTransaction.getId() + ", "
-				+ newTransaction.getDateOfPurchase() + ", " + newTransaction.getCustomerID() + ");";
+		String query = "INSERT INTO Transactions VALUES(" + newTransaction.getId() + ", '"
+				+ newTransaction.getDateOfPurchase() + "', " + newTransaction.getCustomerID()+ ");";
 		try {
 			stmt.executeUpdate(query);
 		} catch (SQLException e) {
@@ -735,7 +715,7 @@ public class Proj2Database {
 			input = readInteger("Enter Customer ID: ");
 			if (customerExists(stmt, input)) {
 				customer = input;
-				input = readInteger("Enter a transaction ID, or enter a new ID to create a new tranaction");
+				input = readInteger("Enter a transaction ID, or enter a new ID to create a new tranaction: ");
 				transaction = input;
 				if (transactionExists(stmt, input)) {
 					return createItemBought(stmt, item, customer, transaction);

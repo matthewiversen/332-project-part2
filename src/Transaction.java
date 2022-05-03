@@ -18,7 +18,6 @@ public class Transaction {
 	public void createDateOfPurchase() {
 		LocalDate currentDate = LocalDate.now();
 		this.dateOfPurchase = currentDate.toString();
-		System.out.println("Class dop: " + this.dateOfPurchase);
 	}
 	public int getCustomerID() {
 		return customerID;
