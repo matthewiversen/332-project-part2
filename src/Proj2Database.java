@@ -674,8 +674,12 @@ public class Proj2Database {
 
 				// if there is a valid item in the Item table, then you can make an order
 				if (itemTotal != 0) {
-					//System.out.print("That is a valid item.");
-					String insertQuery = ( "INSERT INTO Orders (id, itemOrdered, qty, orderDate, onDelivery, delivery) VALUES ('15', '" + String.valueOf(itemID) + "', '" + String.valueOf(quantity) + "', '2022-05-03', '0', NULL)");
+					// get id to be used when inserting an order
+					String biggestIDQuery = ("SELECT id FROM Orders ORDER BY id DESC");
+					ResultSet idReturn = stmt.executeQuery(biggestIDQuery);
+					int biggestID = idReturn.getInt("id") + 1;
+					// insert order
+					String insertQuery = ( "INSERT INTO Orders (id, itemOrdered, qty, orderDate, onDelivery, delivery) VALUES ('" + String.valueOf(biggestID) + "', '" + String.valueOf(itemID) + "', '" + String.valueOf(quantity) + "', '2022-05-03', '0', NULL)");
 					stmt.executeUpdate(insertQuery);
 				} else {
 					System.out.print("That is not a valid item.");
