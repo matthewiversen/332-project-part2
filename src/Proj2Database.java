@@ -51,7 +51,7 @@ public class Proj2Database {
 																					// been previously made for items
 																					// that are currently low on stock
 				if (rsItems.isClosed()) { // If the SQL query returns a closed set, the database inputed doesn't exist.
-					System.out.println("Department doesn't exist.");
+					System.out.println("No items needing restock in department " + input);
 				} else {
 					while (rsItems.next()) {
 						itemsToOrder.add(rsItems.getInt("upc"));
@@ -66,10 +66,10 @@ public class Proj2Database {
 					printAll(itemsToOrder);
 
 					if (previousOrderIDs.size() > 0) {
-						System.out.println("Previous Order IDs for these items: ");
+						System.out.println("Order IDs for these items: ");
 						printAll(previousOrderIDs);
 					} else {
-						System.out.println("No previous orders for these item numbers");
+						System.out.println("No orders for these item numbers");
 					}
 				}
 			} else if (choice == 4) {
@@ -78,7 +78,7 @@ public class Proj2Database {
 
 			} else if (choice == 5) {
 				// Apply Coupon to transaction option
-				clearScreen();
+				//clearScreen();
 
 				System.out.print("\n\t===== TRANSACTION MODIFICATION - COUPONS =====\n\n");
 				int custId = readInteger("Please enter customer ID: ");
@@ -87,7 +87,7 @@ public class Proj2Database {
 
 			} else if (choice == 6) {
 				// Total Transaction Option
-				clearScreen();
+				//clearScreen();
 
 				System.out.print("\n\t===== TRANSACTION TOTAL INQUIRY =====\n\n");
 				int tId = readInteger("Please enter transaction ID: ");
@@ -130,7 +130,7 @@ public class Proj2Database {
 		while (choice <= 0 || choice >= 9) { // Input must be between 1 and 8
 			while (true) {
 				try {
-					clearScreen();
+					//clearScreen();
 					System.out.println("\n\t===== PROJECT 2 DATABASE PROGRAM =====\n");
 					System.out.println("1. Add item to database");
 					System.out.println("2. Get items about to expire");
@@ -294,26 +294,6 @@ public class Proj2Database {
 
 	public static ResultSet getItemsToOrder(Statement stmt, int department) {
 		String query = "SELECT upc FROM Item WHERE department = " + department + " AND restockAmount > currentStock;"; // To
-																														// execute
-																														// a
-																														// SQL
-																														// command,
-																														// save
-																														// in
-																														// a
-																														// string
-																														// and
-																														// then
-																														// pass
-																														// the
-																														// queryString
-																														// as
-																														// an
-																														// arg
-																														// in
-																														// an
-																														// execute
-																														// function
 		try {
 			ResultSet returnRS = stmt.executeQuery(query);
 			return returnRS;
